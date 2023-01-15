@@ -1,5 +1,5 @@
 const poke_container = document.getElementById('poke_container');
-const pokemons_number = 2;
+const pokemons_number = 1;
 var pokeList = []
 const getAllPokemons = async () => {
     let res = await fetch("https://pokeapi.co/api/v2/pokemon/?limit=1279")
@@ -36,7 +36,7 @@ const createPokemonCard = (pokemon) => {
   const pokemonEl = document.createElement('div');
   pokemonEl.classList.add('pokemon');
   const pokeInnerHTML = `
-  <div class='new_pokemon'>
+  <div class='new_pokemon' draggable="true">
   <h2>${pokemon.name}</h2>
   <img src="${pokemon.sprites.front_default}" alt="${pokemon.name}" />
   <h3>
@@ -97,3 +97,54 @@ const result = document.querySelector('ul');
 
 //input.addEventListener('change',showresults);
 input.addEventListener('keyup',showresults);
+
+let dragged;
+
+/* events fired on the draggable target */
+const source = document.getElementById("poke_container");
+source.addEventListener("drag", (event) => {
+  console.log("dragging");
+});
+
+source.addEventListener("dragstart", (event) => {
+  // store a ref. on the dragged elem
+  dragged = event.target;
+  // make it half transparent
+  event.target.classList.add("dragging");
+});
+
+source.addEventListener("dragend", (event) => {
+  // reset the transparency
+  event.target.classList.remove("dragging");
+});
+
+/* events fired on the drop targets */
+const target = document.getElementById("droptarget");
+target.addEventListener("dragover", (event) => {
+  // prevent default to allow drop
+  event.preventDefault();
+}, false);
+
+target.addEventListener("dragenter", (event) => {
+  // highlight potential drop target when the poke_container element enters it
+  if (event.target.classList.contains("dropzone")) {
+    event.target.classList.add("dragover");
+  }
+});
+
+target.addEventListener("dragleave", (event) => {
+  // reset background of potential drop target when the poke_container element leaves it
+  if (event.target.classList.contains("dropzone")) {
+    event.target.classList.remove("dragover");
+  }
+});
+
+target.addEventListener("drop", (event) => {
+  // prevent default action (open as link for some elements)
+  event.preventDefault();
+  // move dragged element to the selected drop target
+  if (event.target.classList.contains("dropzone")) {
+    event.target.classList.remove("dragover");
+    event.target.appendChild(dragged);
+  }
+});
